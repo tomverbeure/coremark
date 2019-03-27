@@ -41,8 +41,9 @@ Original Author: Shay Gal-on
 	Sample implementation for standard time.h and windows.h definitions included.
 */
 CORETIMETYPE barebones_clock() {
-//	#error "You must implement a method to measure time in barebones_clock()! This function should return current time.\n"
-    return 0;
+	int cycles;
+	asm volatile ("rdcycle %0" : "=r"(cycles));
+        return cycles;
 }
 /* Define : TIMER_RES_DIVIDER
 	Divider to trade off timer resolution and total time that can be measured.
@@ -54,7 +55,7 @@ CORETIMETYPE barebones_clock() {
 #define MYTIMEDIFF(fin,ini) ((fin)-(ini))
 #define TIMER_RES_DIVIDER 1
 #define SAMPLE_TIME_IMPLEMENTATION 1
-#define EE_TICKS_PER_SEC (10 / TIMER_RES_DIVIDER)
+#define EE_TICKS_PER_SEC (1 / TIMER_RES_DIVIDER)
 
 /** Define Host specific (POSIX), or target specific global time variables. */
 static CORETIMETYPE start_time_val, stop_time_val;

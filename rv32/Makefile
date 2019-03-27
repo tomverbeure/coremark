@@ -11,7 +11,7 @@ TOOLCHAIN_PREFIX = /opt/riscv32i/bin/riscv32-unknown-elf-
 # VM settings
 CFLAGS = -MD -O2 -march=rv32im -g -Wall -I.. -I. -DITERATIONS=$(ITERATIONS)
 CFLAGS += -DPERFORMANCE_RUN=1
-CFLAGS += -DCORE_DEBUG=1
+//CFLAGS += -DCORE_DEBUG=1
 
 all: $(EXE_NAME).dis $(EXE_NAME).bin
 
