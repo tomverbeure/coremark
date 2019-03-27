@@ -1,5 +1,4 @@
 
-EXE_NAME        = coremark
 ITERATIONS      = 1
 
 GENERIC_OBJS  = ../core_main.o ../core_list_join.o ../core_matrix.o ../core_state.o ../core_util.o 
@@ -8,21 +7,53 @@ OBJS          = start.o $(GENERIC_OBJS) $(PLATFORM_OBJS)
 
 TOOLCHAIN_PREFIX = /opt/riscv32i/bin/riscv32-unknown-elf-
 
-# VM settings
-CFLAGS = -MD -O2 -march=rv32im -g -Wall -I.. -I. -DITERATIONS=$(ITERATIONS)
-CFLAGS += -DPERFORMANCE_RUN=1
-//CFLAGS += -DCORE_DEBUG=1
+CFLAGS_COMMON =  -g -Wall -I.. -I. -DITERATIONS=$(ITERATIONS)
+CFLAGS_COMMON += -DPERFORMANCE_RUN=1
 
-all: $(EXE_NAME).dis $(EXE_NAME).bin
+CFLAGS 		= $(CFLAGS_COMMON)
 
-$(EXE_NAME).dis: $(EXE_NAME).elf
+LDFLAGS 	= --std=gnu99 -ffreestanding -nostdlib -lgcc
+
+coremark_Os_rv32imc.bin: CFLAGS += -Os -march=rv32imc 
+coremark_Os_rv32imc.bin: EXE_NAME = coremark_Os_rv32imc
+
+coremark_O2_rv32imc.bin: CFLAGS += -O2 -march=rv32imc
+coremark_O2_rv32imc.bin: EXE_NAME = coremark_O2_rv32imc
+
+coremark_Os_rv32im.bin: CFLAGS += -Os -march=rv32im
+coremark_Os_rv32im.bin: EXE_NAME = coremark_Os_rv32im
+
+coremark_O2_rv32im.bin: CFLAGS += -O2 -march=rv32im
+coremark_O2_rv32im.bin: EXE_NAME = coremark_O2_rv32im
+
+coremark_O2_rv32i.bin: CFLAGS += -O2 -march=rv32i
+coremark_O2_rv32i.bin: EXE_NAME = coremark_O2_rv32i
+
+.PHONY: all
+all: 
+	make clean
+	make coremark_Os_rv32imc.bin coremark_Os_rv32imc.dis coremark_Os_rv32imc.hex
+	make clean
+	make coremark_O2_rv32imc.bin coremark_O2_rv32imc.dis coremark_O2_rv32imc.hex 
+	make clean
+	make coremark_Os_rv32im.bin coremark_Os_rv32im.dis coremark_Os_rv32im.hex  
+	make clean
+	make coremark_O2_rv32im.bin coremark_O2_rv32im.dis coremark_O2_rv32im.hex  
+	make clean
+	make coremark_O2_rv32i.bin coremark_O2_rv32i.dis coremark_O2_rv32i.hex  
+
+coremark_%.dis: $(EXE_NAME).elf
 	$(TOOLCHAIN_PREFIX)objdump -D $< > $@
 
-$(EXE_NAME).bin: $(EXE_NAME).elf
+coremark_%.bin: $(EXE_NAME).elf
+	echo $(EXE_NAME)
 	$(TOOLCHAIN_PREFIX)objcopy -O binary $< $@
 
+coremark_%.hex: coremark_%.bin
+	$(TOOLCHAIN_PREFIX)objcopy -I binary -O ihex $< $@
+
 $(EXE_NAME).elf: $(OBJS)
-	$(TOOLCHAIN_PREFIX)gcc $(CFLAGS) -T sections.lds -Wl,-Bstatic,-Map,$(EXE_NAME).map,--strip-debug -nostdlib -o $@ $(OBJS) 
+	$(TOOLCHAIN_PREFIX)gcc $(CFLAGS) -T sections.lds -Wl,-Bstatic,-Map,$(EXE_NAME).map,--strip-debug -o $@ $(OBJS) $(LDFLAGS)
 	chmod -x $@
 
 %.o: %.c Makefile
@@ -33,8 +64,10 @@ $(EXE_NAME).elf: $(OBJS)
 
 .PHONY: clean
 clean:
-	rm -rf ../*.s *.s ../*.o *.o ../*.d *.d $(EXE_NAME).elf $(EXE_NAME).map $(EXE_NAME).bin $(EXE_NAME).hex $(EXE_NAME).dis
+	rm -rf ../*.s *.s ../*.o *.o ../*.d *.d .elf .map
 
+clean_all: clean
+	rm -rf *.elf *.map *.bin *.dis *.hex
 
 -include *.d
 
