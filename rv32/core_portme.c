@@ -125,6 +125,7 @@ void portable_init(core_portable *p, int *argc, char *argv[])
 void portable_fini(core_portable *p)
 {
 	p->portable_id=0;
+    *((unsigned int *)(0x80000008)) = get_time();
 }
 
 
