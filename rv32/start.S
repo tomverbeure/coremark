@@ -4,8 +4,8 @@
 	.global main
 
 start:
-	// We have 64KB or RAM
-	li sp,0x10000
+	// We have 32KB or RAM
+	li sp,0x08000
 
 	// jump to main C code 
 	jal ra,main
